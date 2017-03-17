@@ -1,0 +1,11 @@
+version: '3'
+services:
+  native:
+    build: .
+    command: bash -c "echo 'Starting the server' && yarn start && adb reverse tcp:19000 tcp:19000"
+    volumes:
+      - .:/TestTabs_v2
+    devices:
+      - "/dev/bus/usb/003:/dev/bus/usb/003"
+    ports:
+      - "19000:19000"
