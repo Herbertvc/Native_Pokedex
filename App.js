@@ -3,13 +3,14 @@ import {
   StyleSheet,
   Text,
   View,
+  ScrollView,
   StatusBar,
   TouchableHighlight,
 } from 'react-native';
 
 import NavBar from './src/components/NavBar';
 import List from './src/components/List';
-import Pokedex from 'pokedex-promise-v2';
+import axios from 'axios';
 
 export default class App extends React.Component {
   state = {
@@ -17,10 +18,21 @@ export default class App extends React.Component {
     pokemons: [],
   };
 
-  componentDidMount() {
-    const P = new Pokedex();
-    P.getPokemonByName([...Array(150).keys()].map(e => e + 1 ), () => {
+  componentWillMount() {
+    let tempArr = [];
+    Array(20).fill(0).forEach((e,i) => tempArr.push(i+1));
 
+    tempArr.forEach(e => {
+      axios(`https://pokeapi.co/api/v2/pokemon/${e}/`)
+        .then(response => response.data)
+        .then(data => {
+          this.setState({
+            pokemons: [...this.state.pokemons,data],
+          })
+        })
+        .catch(error => {
+          alert(error);
+        });
     })
   };
 
@@ -29,11 +41,13 @@ export default class App extends React.Component {
   };
 
   render() {
+    let listComponent = this.state.pokemons.length === 20 ? <List elements={this.state.pokemons} /> : <Text>Loading pokemons...</Text>
+
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
         <NavBar />
-        <List />
-      </View>
+        { listComponent }
+      </ScrollView>
     );
   }
 }
