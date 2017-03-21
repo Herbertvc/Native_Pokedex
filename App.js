@@ -16,6 +16,7 @@ export default class App extends React.Component {
   state = {
     searchTerm: '',
     pokemons: [],
+    filteredPokemons: [],
   };
 
   componentWillMount() {
@@ -26,9 +27,11 @@ export default class App extends React.Component {
       axios(`https://pokeapi.co/api/v2/pokemon/${e}/`)
         .then(response => response.data)
         .then(data => {
+          let tempPokemons = [...this.state.pokemons, data].sort((a,b) => a.id - b.id);
+
           this.setState({
-            pokemons: [...this.state.pokemons,data],
-          })
+            pokemons: tempPokemons,
+          });
         })
         .catch(error => {
           alert(error);
@@ -36,16 +39,18 @@ export default class App extends React.Component {
     })
   };
 
-  onSearch = (e) => {
-    this.setState({ searchTerm: e.target.value });
+  onSearch = (text) => {
+    this.setState({ searchTerm: text });
   };
 
+  filteredElements = () => this.state.pokemons.filter(element => element.name.indexOf(this.state.searchTerm) >= 0);
+
   render() {
-    let listComponent = this.state.pokemons.length === 20 ? <List elements={this.state.pokemons} /> : <Text>Loading pokemons...</Text>
+    let listComponent = this.state.pokemons.length === 20 ? <List elements={this.filteredElements()} /> : <Text>Loading pokemons...</Text>
 
     return (
       <ScrollView style={styles.container}>
-        <NavBar />
+        <NavBar onSearch={this.onSearch} />
         { listComponent }
       </ScrollView>
     );
